@@ -1,6 +1,7 @@
 namespace Csv.Tests.Deserialize
 {
     using System.IO;
+    using System.Linq;
     using Models;
     using Xunit;
 
@@ -11,7 +12,7 @@ namespace Csv.Tests.Deserialize
         {
             var text = File.ReadAllText(@".\Files\FileWithHeader.csv");
             var result = CsvConvert.Deserialize<FileWithHeader>(text);
-            Assert.NotNull(text);
+            Assert.Equal(3, result.Count());
         }
     }
 }

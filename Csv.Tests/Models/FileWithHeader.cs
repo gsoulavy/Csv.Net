@@ -1,9 +1,10 @@
 ﻿namespace Csv.Tests.Models
 {
-    [CsvFile(IncludeHeaders = true, Separator = ',')]
+    [CsvFile(HasHeaders = true, Separator = ',')]
     public class FileWithHeader
     {
-        [CsvColumn(Name = "name")] public string Name { get; set; }
-        [CsvColumn(Name = "age", Position = 1)] public int Age { get; set; }
+        [CsvColumn("name")] public string Name { get; set; }
+        [CsvColumn("age")] public int Age { get; set; }
+        public string Title { get; set; }
     }
 }
