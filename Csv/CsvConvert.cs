@@ -32,14 +32,19 @@
 
         private static void ExtractPositions(string line)
         {
-            var header = line.Split(_fileAttribute.Separator).Select(h => h.Trim()).ToList();
+            var header = line.Split(_fileAttribute.Separator).Select(Sanitize()).ToList();
             foreach (var (property, attribute) in ColumnAttributes.OrderBy(c => c.attribute.Position))
                 _positions.Add((header.IndexOf(attribute.Name), property));
         }
 
+        private static Func<string, string> Sanitize()
+        {
+            return s => s.Trim().Trim(_fileAttribute.StringQuotes);
+        }
+
         private static T ParseData<T>(string line)
         {
-            var dataLine = line?.Split(_fileAttribute.Separator).ToList() ??
+            var dataLine = line?.Split(_fileAttribute.Separator).Select(Sanitize()).ToList() ??
                            throw new ArgumentException("The Csv file does not contain data");
             var type = typeof(T);
             var result = (T) Activator.CreateInstance(type);
@@ -63,13 +68,14 @@
             _fileAttribute = typeof(T).GetTypeInfo().GetCustomAttribute<CsvFileAttribute>();
             if (_fileAttribute is null)
                 throw new ArgumentException($"CsvFileAttribute is not defined for the {typeof(T).Name}");
-
+            var count = 0;
             foreach (var property in typeof(T).GetProperties())
             {
                 var attribute =
                     Attribute.GetCustomAttribute(property, typeof(CsvColumnAttribute)) as CsvColumnAttribute;
                 ColumnAttributes.Add((property,
-                    attribute ?? new CsvColumnAttribute(property.Name)));
+                    attribute ?? new CsvColumnAttribute(property.Name){Position = count}));
+                count++;
             }
 
             _positions = new List<(int index, PropertyInfo propertyName)>();

@@ -6,5 +6,6 @@
     {
         public bool HasHeaders { get; set; }
         public char Separator { get; set; } = ',';
+        public char StringQuotes { get; set; } = '\0';
     }
 }
