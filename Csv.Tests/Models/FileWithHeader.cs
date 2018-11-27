@@ -5,6 +5,6 @@
     {
         [CsvColumn("name")] public string Name { get; set; }
         [CsvColumn("age")] public int Age { get; set; }
-        public string Title { get; set; }
+        [CsvIgnore] public string Title { get; set; }
     }
 }

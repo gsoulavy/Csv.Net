@@ -1,11 +1,11 @@
-namespace Csv.Tests.Deserialize
+namespace Csv.Tests.CsvConvertTests
 {
     using System.IO;
     using System.Linq;
     using Models;
     using Xunit;
 
-    public class ResolveFile
+    public class Deserialize
     {
         [Fact]
         public void FileAttributeIsDefined()
