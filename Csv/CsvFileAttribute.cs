@@ -1,4 +1,5 @@
-﻿namespace Csv {
+﻿namespace Csv
+{
     using System;
 
     [AttributeUsage(AttributeTargets.Class)]
