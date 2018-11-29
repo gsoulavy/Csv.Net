@@ -3,7 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>GSoulavy.Csv</RootNamespace>
-    <AssemblyName>Csv.Net</AssemblyName>
+    <AssemblyName>GSoulavy.Csv.Net</AssemblyName>
+    <Authors>Gab Soulavy</Authors>
+    <Description>Simple csv .Net Standard 2.0 parser library. It parses a csv string file into generic strogly typed IEnumerable. It also serializes a flat object to csv string.</Description>
+    <Copyright>MIT</Copyright>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/gsoulavy/Csv.Net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/gsoulavy/Csv.Net.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>csv dotnet standard parser</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>GSoulavy.Csv.Net</PackageId>
   </PropertyGroup>
 
 </Project>
