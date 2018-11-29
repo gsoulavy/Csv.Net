@@ -1,4 +1,4 @@
-﻿namespace Csv
+﻿namespace GSoulavy.Csv
 {
     using System;
 

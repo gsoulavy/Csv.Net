@@ -1,4 +1,4 @@
-﻿namespace Csv.Tests.Models
+﻿namespace GSoulavy.Csv.Tests.Models
 {
     [CsvFile(HasHeaders = true, Separator = ',', StringQuotes = '"')]
     public class FileWithQuotes

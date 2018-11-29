@@ -1,4 +1,4 @@
-﻿namespace Csv.Tests.CsvConvertTests
+﻿namespace GSoulavy.Csv.Tests.CsvConvertTests
 {
     using System.Collections.Generic;
     using Models;
