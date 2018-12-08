@@ -1,4 +1,6 @@
-# Csv.Net
+# GSoulavy.Csv.Net
+
+[![NuGet version (Newtonsoft.Json)](https://img.shields.io/nuget/v/GSoulavy.Csv.Net.svg?style=flat-square)](https://www.nuget.org/packages/GSoulavy.Csv.Net/)
 
 Simple csv .Net Standard 2.0 parser library
 
