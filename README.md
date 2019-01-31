@@ -39,6 +39,9 @@ Mapping:
 
         [CsvIgnore]
         public string Title { get; set; }
+
+        [CsvColumn("dob", Format = "yyyy-M-d")]
+        public DateTime DateOfBirth { get; set; }
     }
 ```
 Desiralizing in action:

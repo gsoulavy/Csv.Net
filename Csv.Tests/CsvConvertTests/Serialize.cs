@@ -1,6 +1,8 @@
 ﻿namespace GSoulavy.Csv.Tests.CsvConvertTests
 {
+    using System;
     using System.Collections.Generic;
+    using FluentAssertions;
     using Models;
     using Xunit;
 
@@ -15,8 +17,19 @@
                 new FileWithHeader {Age = 11, Name = "Anna", Title = "Miss"}
             };
             var result = CsvConvert.Serialize(list);
+            result.Should().Be("name, age\r\nJoe, 32\r\nAnna, 11\r\n");
+        }
 
-            Assert.Equal("name, age\r\nJoe, 32\r\nAnna, 11\r\n", result);
+        [Fact]
+        public void CreateFileWithHeaderAndDate()
+        {
+            var list = new List<FileWithHeaderAndDate>
+            {
+                new FileWithHeaderAndDate
+                    {Age = 32, Name = "Joe", Title = "Mr", DateOfBirth = new DateTime(1980, 10, 11)}
+            };
+            var result = CsvConvert.Serialize(list);
+            result.Should().Be("name, age, dob\r\nJoe, 32, 1980-10-11\r\n");
         }
     }
 }
