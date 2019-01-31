@@ -1,4 +1,5 @@
-﻿namespace GSoulavy.Csv.Tests.Models {
+﻿namespace GSoulavy.Csv.Tests.Models 
+ {
     using System;
 
     [CsvFile(HasHeaders = true, Separator = ',')]
