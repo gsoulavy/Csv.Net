@@ -1,10 +1,9 @@
 ﻿namespace GSoulavy.Csv.Tests.Models
 {
-    using System.Runtime.Serialization;
-    using Newtonsoft.Json;
+    using System;
 
     [CsvFile(HasHeaders = true, Separator = ',')]
-    public class FileWithHeader
+    public class FileWithHeaderAndDate
     {
         [CsvColumn("name")]
         public string Name { get; set; }
@@ -14,5 +13,8 @@
 
         [CsvIgnore]
         public string Title { get; set; }
+
+        [CsvColumn("dob", Format = "yyyy-M-d")]
+        public DateTime DateOfBirth { get; set; }
     }
 }

@@ -12,5 +12,6 @@
 
         public string Name { get; }
         public int Position { get; set; } = -1;
+        public string Format { get; set; } = string.Empty;
     }
 }

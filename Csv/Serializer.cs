@@ -7,6 +7,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Text;
+    using DateTimeConverter = CustomConverters.DateTimeConverter;
 
     internal class Serializer<T> where T : class
     {
@@ -67,20 +68,36 @@
             var dataLine = line?.Split(_fileAttribute.Separator).Select(Sanitize()).ToList() ??
                            throw new ArgumentException("The Csv file does not contain data");
             var type = typeof(T);
-            var result = (T) Activator.CreateInstance(type);
+            var instance = (T) Activator.CreateInstance(type);
             foreach (var propertyInfo in type.GetProperties())
                 try
                 {
                     var data = dataLine[_positions.First(c => c.propertyInfo.Name == propertyInfo.Name).index];
-                    propertyInfo.SetValue(result,
-                        TypeDescriptor.GetConverter(propertyInfo.PropertyType).ConvertFrom(data));
+                    var propertyType = propertyInfo.PropertyType;
+                    if (propertyType == typeof(DateTime))
+                    {
+                        var dateFormat = GetDateFormat(propertyInfo);
+                        if (dateFormat != null)
+                            propertyInfo.SetValue(instance, DateTimeConverter.ConvertFromString(data, dateFormat));
+                    }
+                    else
+                    {
+                        propertyInfo.SetValue(instance,
+                            TypeDescriptor.GetConverter(propertyType).ConvertFrom(data));
+                    }
                 }
                 catch
                 {
                     // The actual value is not matched, therefore it will be ignored
                 }
 
-            return result;
+            return instance;
+        }
+
+        private string GetDateFormat(PropertyInfo propertyInfo)
+        {
+            return _columnAttributeMappings
+                .FirstOrDefault(ca => ca.property.Name == propertyInfo.Name).attribute?.Format;
         }
 
         private void ExtractPositions(string line)
@@ -97,16 +114,12 @@
 
         public string Serialize(IEnumerable<T> list)
         {
-            if (_fileAttribute.HasHeaders)
-            {
-                ExtractPosition();
-                var header = string.Join($"{_fileAttribute.Separator} ",
-                    _columnAttributeMappings.OrderBy(c => c.attribute.Position).Select(c => c.attribute.Name));
-                return
-                    $"{header}{Environment.NewLine}{ToCsvString(list)}";
-            }
-
-            return string.Empty;
+            if (!_fileAttribute.HasHeaders) return string.Empty;
+            ExtractPosition();
+            var header = string.Join($"{_fileAttribute.Separator} ",
+                _columnAttributeMappings.OrderBy(c => c.attribute.Position).Select(c => c.attribute.Name));
+            return
+                $"{header}{Environment.NewLine}{ToCsvString(list)}";
         }
 
 
@@ -127,7 +140,12 @@
                 var data = properties
                     .Join(_columnAttributeMappings, p => p.Name, c => c.property.Name,
                         (p, c) => new {p, c.attribute.Position})
-                    .OrderBy(j => j.Position).Select(p => p.p.GetValue(item).ToString());
+                    .OrderBy(j => j.Position).Select(p =>
+                    {
+                        if (p.p.PropertyType != typeof(DateTime)) return p.p.GetValue(item).ToString();
+                        var dateFormat = GetDateFormat(p.p);
+                        return dateFormat != null ? ((DateTime) p.p.GetValue(item)).ToString(dateFormat) : p.p.GetValue(item).ToString();
+                    });
                 sb.Append(
                     $"{string.Join(", ", data)}{Environment.NewLine}");
             }
