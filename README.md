@@ -91,7 +91,7 @@ Your model declaration:
         [CsvIgnore]
         public string Title { get; set; }
 
-        [CsvColumn("dob", typeof(CustomDateTimeConverter))]
+        [CsvColumn("dob", typeof(CustomDateTimeConversion))]
         public DateTime DateOfBirth { get; set; }
     }
 ```
