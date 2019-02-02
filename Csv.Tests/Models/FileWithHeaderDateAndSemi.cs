@@ -1,9 +1,8 @@
-﻿namespace GSoulavy.Csv.Tests.Models
-{
+﻿namespace GSoulavy.Csv.Tests.Models {
     using System;
 
-    [CsvFile(HasHeaders = true, Separator = ',')]
-    public class FileWithHeaderAndDate
+    [CsvFile(HasHeaders = true, Separator = ';')]
+    public class FileWithHeaderDateAndSemi
     {
         [CsvColumn("name")]
         public string Name { get; set; }

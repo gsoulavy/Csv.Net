@@ -7,7 +7,6 @@
     using System.Linq;
     using System.Reflection;
     using System.Text;
-    using DateTimeConverter = CustomConverters.DateTimeConverter;
 
     internal class Serializer<T> where T : class
     {
@@ -73,17 +72,17 @@
                 try
                 {
                     var data = dataLine[_positions.First(c => c.propertyInfo.Name == propertyInfo.Name).index];
-                    var propertyType = propertyInfo.PropertyType;
-                    if (propertyType == typeof(DateTime))
+                    var customConverter = GetCustomConverter(propertyInfo);
+                    if (customConverter is null)
                     {
-                        var dateFormat = GetDateFormat(propertyInfo);
-                        if (dateFormat != null)
-                            propertyInfo.SetValue(instance, DateTimeConverter.ConvertFromString(data, dateFormat));
+                        propertyInfo.SetValue(instance,
+                            TypeDescriptor.GetConverter(propertyInfo.PropertyType).ConvertFrom(data));
                     }
                     else
                     {
+                        var converter = (ICustomConversion) Activator.CreateInstance(customConverter);
                         propertyInfo.SetValue(instance,
-                            TypeDescriptor.GetConverter(propertyType).ConvertFrom(data));
+                            converter.Parse(data));
                     }
                 }
                 catch
@@ -94,10 +93,10 @@
             return instance;
         }
 
-        private string GetDateFormat(PropertyInfo propertyInfo)
+        private Type GetCustomConverter(PropertyInfo propertyInfo)
         {
-            return _columnAttributeMappings
-                .FirstOrDefault(ca => ca.property.Name == propertyInfo.Name).attribute?.Format;
+            return _columnAttributeMappings.FirstOrDefault(cam => cam.property == propertyInfo)
+                .attribute.ColumnConverter;
         }
 
         private void ExtractPositions(string line)
@@ -142,12 +141,18 @@
                         (p, c) => new {p, c.attribute.Position})
                     .OrderBy(j => j.Position).Select(p =>
                     {
-                        if (p.p.PropertyType != typeof(DateTime)) return p.p.GetValue(item).ToString();
-                        var dateFormat = GetDateFormat(p.p);
-                        return dateFormat != null ? ((DateTime) p.p.GetValue(item)).ToString(dateFormat) : p.p.GetValue(item).ToString();
+                        var customConverter = GetCustomConverter(p.p);
+                        if (customConverter is null)
+                            return p.p.GetValue(item).ToString();
+                        else
+                        {
+                            var converter = (ICustomConversion) Activator.CreateInstance(customConverter);
+                            return converter.Compose(p.p.GetValue(item));
+                        } 
+
                     });
                 sb.Append(
-                    $"{string.Join(", ", data)}{Environment.NewLine}");
+                    $"{string.Join($"{_fileAttribute.Separator} ", data)}{Environment.NewLine}");
             }
 
             return sb.ToString();

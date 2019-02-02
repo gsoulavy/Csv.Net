@@ -34,5 +34,14 @@ namespace GSoulavy.Csv.Tests.CsvConvertTests
             result.First().Name.Should().Be("Gabs");
             result.First().DateOfBirth.Should().Be(new DateTime(1980, 10, 11));
         }
+
+        [Fact]
+        public void FileWithHeaderDateAndSemi()
+        {
+            var text = File.ReadAllText(@".\Files\FileWithHeaderDateAndSemi.csv");
+            var result = CsvConvert.Deserialize<FileWithHeaderDateAndSemi>(text).ToList();
+            result.First().Name.Should().Be("Gabs");
+            result.First().DateOfBirth.Should().Be(new DateTime(1980, 10, 11));
+        }
     }
 }
