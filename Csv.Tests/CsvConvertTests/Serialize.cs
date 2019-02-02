@@ -29,7 +29,19 @@
                     {Age = 32, Name = "Joe", Title = "Mr", DateOfBirth = new DateTime(1980, 10, 11)}
             };
             var result = CsvConvert.Serialize(list);
-            result.Should().Be("name, age, dob\r\nJoe, 32, 1980-10-11\r\n");
+            result.Should().Be("name, age, dob\r\nJoe, 32, 11.10.1980\r\n");
+        }
+
+        [Fact]
+        public void CreateFileWithHeaderDateAndSemi()
+        {
+            var list = new List<FileWithHeaderDateAndSemi>
+            {
+                new FileWithHeaderDateAndSemi
+                    {Age = 32, Name = "Joe", Title = "Mr", DateOfBirth = new DateTime(1980, 10, 31)}
+            };
+            var result = CsvConvert.Serialize(list);
+            result.Should().Be("name; age; dob\r\nJoe; 32; 31.10.1980\r\n");
         }
     }
 }

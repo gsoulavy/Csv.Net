@@ -26,7 +26,7 @@ Gabs, 35
 Joe, 40
 ```
 
-Mapping:
+Mapping (v1.1):
  ```cs
     [CsvFile(HasHeaders = true, Separator = ',')]
     public class Person
@@ -41,6 +41,57 @@ Mapping:
         public string Title { get; set; }
 
         [CsvColumn("dob", Format = "yyyy-M-d")]
+        public DateTime DateOfBirth { get; set; }
+    }
+```
+Mapping (v2.0)
+
+You need to implement the ICustomConversion interface in order to achieve custom conversion and pass as a type into your CsvColumnAttribute
+
+The `ICustomConversion` inteface:
+```cs
+    public interface ICustomConversion
+    {
+        object Parse(string value);
+
+        string Compose(object value);
+    }
+```
+The `ICustomConversion` inteface:
+An example implementaion for example by you as `CustomDateTimeConversion`:
+```cs
+    public class CustomDateTimeConversion : ICustomConversion
+    {
+        private const string Format = "d.M.yyyy";
+
+        public object Parse(string value)
+        {
+            return DateTime.TryParseExact(value, Format, CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var parsedDate) ? parsedDate : DateTime.MinValue;
+        }
+
+        public string Compose(object value)
+        {
+            return ((DateTime) value).ToString(Format);
+        }
+    
+```
+Your model declaration:
+```cs
+    [CsvFile(HasHeaders = true, Separator = ';')]
+    public class FileWithHeaderDateAndSemi
+    {
+        [CsvColumn("name")]
+        public string Name { get; set; }
+
+        [CsvColumn("age")]
+        public int Age { get; set; }
+
+        [CsvIgnore]
+        public string Title { get; set; }
+
+        [CsvColumn("dob", typeof(CustomDateTimeConverter))]
         public DateTime DateOfBirth { get; set; }
     }
 ```
