@@ -75,7 +75,7 @@ An example implementaion for example by you as `CustomDateTimeConversion`:
         {
             return ((DateTime) value).ToString(Format);
         }
-    
+    }
 ```
 Your model declaration:
 ```cs
