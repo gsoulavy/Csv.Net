@@ -17,8 +17,7 @@
         public Serializer()
         {
             _fileAttribute = GetFileAttribute() ??
-                             throw new ArgumentException($"CsvFileAttribute is not defined for the {typeof(T).Name}");
-            ;
+                             new CsvFileAttribute {HasHeaders = true, Separator = ','};
             _columnAttributeMappings = GetColumnAttributeMappings();
             _positions = new List<(int index, PropertyInfo propertyName)>();
         }
@@ -143,13 +142,12 @@
                     {
                         var customConverter = GetCustomConverter(p.p);
                         if (customConverter is null)
-                            return p.p.GetValue(item).ToString();
-                        else
                         {
-                            var converter = (ICustomConversion) Activator.CreateInstance(customConverter);
-                            return converter.Compose(p.p.GetValue(item));
-                        } 
+                            return p.p.GetValue(item).ToString();
+                        }
 
+                        var converter = (ICustomConversion) Activator.CreateInstance(customConverter);
+                        return converter.Compose(p.p.GetValue(item));
                     });
                 sb.Append(
                     $"{string.Join($"{_fileAttribute.Separator} ", data)}{Environment.NewLine}");

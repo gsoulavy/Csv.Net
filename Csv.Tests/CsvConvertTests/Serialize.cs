@@ -21,6 +21,18 @@
         }
 
         [Fact]
+        public void CreateFileWithHeaderWithoutAttributes()
+        {
+            var list = new List<FileWithHeaderWithoutAttributes>
+            {
+                new FileWithHeaderWithoutAttributes { Age = 32, Name = "John"},
+                new FileWithHeaderWithoutAttributes { Age = 22, Name = "Barbara" }
+            };
+            var result = CsvConvert.Serialize(list);
+            result.Should().Be("Name, Age\r\nJohn, 32\r\nBarbara, 22\r\n");
+        }
+
+        [Fact]
         public void CreateFileWithHeaderAndDate()
         {
             var list = new List<FileWithHeaderAndDate>
