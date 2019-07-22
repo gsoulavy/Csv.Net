@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Security.Cryptography;
     using System.Text;
 
     internal class Serializer<T> where T : class
@@ -58,6 +59,21 @@
                 if (_fileAttribute.HasHeaders) ExtractPositions(line);
 
                 while ((line = stringReader.ReadLine()) != null) yield return ParseData(line);
+            }
+        }
+
+        public IEnumerable<T> Deserialize(Stream csvStream)
+        {
+            using (var streamReader = new StreamReader(csvStream))
+            {
+                while (!streamReader.EndOfStream)
+                {
+                    var line = streamReader.ReadLine();
+                    
+                    if (_fileAttribute.HasHeaders) ExtractPositions(line);
+
+                    yield return ParseData(line);
+                }
             }
         }
 
