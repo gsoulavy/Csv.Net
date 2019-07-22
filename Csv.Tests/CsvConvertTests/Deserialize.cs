@@ -43,5 +43,17 @@ namespace GSoulavy.Csv.Tests.CsvConvertTests
             result.First().Name.Should().Be("Gabs");
             result.First().DateOfBirth.Should().Be(new DateTime(1980, 10, 11));
         }
+
+        [Fact]
+        public void FileWithHeaderAndModelWithoutAttributes()
+        {
+            var text = File.ReadAllText(@".\Files\FileWithHeaderWithoutAttributes.csv");
+            var result = CsvConvert.Deserialize<FileWithHeaderWithoutAttributes>(text).ToList();
+            result.Count().Should().Be(3);
+            result.First().Name.Should().Be("Gabs");
+            result.First().Age.Should().Be(35);
+            result.Last().Name.Should().Be("Anna");
+            result.Last().Age.Should().Be(23);
+        }
     }
 }

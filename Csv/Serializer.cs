@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Security.Cryptography;
     using System.Text;
 
     internal class Serializer<T> where T : class
@@ -17,8 +18,7 @@
         public Serializer()
         {
             _fileAttribute = GetFileAttribute() ??
-                             throw new ArgumentException($"CsvFileAttribute is not defined for the {typeof(T).Name}");
-            ;
+                             new CsvFileAttribute {HasHeaders = true, Separator = ','};
             _columnAttributeMappings = GetColumnAttributeMappings();
             _positions = new List<(int index, PropertyInfo propertyName)>();
         }
@@ -59,6 +59,21 @@
                 if (_fileAttribute.HasHeaders) ExtractPositions(line);
 
                 while ((line = stringReader.ReadLine()) != null) yield return ParseData(line);
+            }
+        }
+
+        public IEnumerable<T> Deserialize(Stream csvStream)
+        {
+            using (var streamReader = new StreamReader(csvStream))
+            {
+                while (!streamReader.EndOfStream)
+                {
+                    var line = streamReader.ReadLine();
+                    
+                    if (_fileAttribute.HasHeaders) ExtractPositions(line);
+
+                    yield return ParseData(line);
+                }
             }
         }
 
@@ -143,13 +158,12 @@
                     {
                         var customConverter = GetCustomConverter(p.p);
                         if (customConverter is null)
-                            return p.p.GetValue(item).ToString();
-                        else
                         {
-                            var converter = (ICustomConversion) Activator.CreateInstance(customConverter);
-                            return converter.Compose(p.p.GetValue(item));
-                        } 
+                            return p.p.GetValue(item).ToString();
+                        }
 
+                        var converter = (ICustomConversion) Activator.CreateInstance(customConverter);
+                        return converter.Compose(p.p.GetValue(item));
                     });
                 sb.Append(
                     $"{string.Join($"{_fileAttribute.Separator} ", data)}{Environment.NewLine}");
