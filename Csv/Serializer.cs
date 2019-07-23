@@ -6,7 +6,6 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Security.Cryptography;
     using System.Text;
 
     internal class Serializer<T> where T : class
@@ -23,9 +22,59 @@
             _positions = new List<(int index, PropertyInfo propertyName)>();
         }
 
-        private static CsvFileAttribute GetFileAttribute()
+        public IEnumerable<T> Deserialize(string csv)
         {
-            return typeof(T).GetTypeInfo().GetCustomAttribute<CsvFileAttribute>();
+            using (var stringReader = new StringReader(csv))
+            {
+                var line = stringReader.ReadLine();
+
+                if (_fileAttribute.HasHeaders) ExtractPositions(line);
+
+                while ((line = stringReader.ReadLine()) != null) yield return ParseData(line);
+            }
+        }
+
+        public IEnumerable<T> Deserialize(Stream csvStream)
+        {
+            using (var streamReader = new StreamReader(csvStream))
+            {
+                var line = streamReader.ReadLine();
+
+                if (_fileAttribute.HasHeaders) ExtractPositions(line);
+
+                while (!streamReader.EndOfStream) yield return ParseData(line);
+            }
+        }
+
+        public string Serialize(IEnumerable<T> list)
+        {
+            if (!_fileAttribute.HasHeaders) return string.Empty;
+            ExtractPosition();
+            var header = string.Join($"{_fileAttribute.Separator} ",
+                _columnAttributeMappings.OrderBy(c => c.attribute.Position).Select(c => c.attribute.Name));
+            return
+                $"{header}{Environment.NewLine}{ToCsvString(list)}";
+        }
+
+        internal static Serializer<T> Create()
+        {
+            return new Serializer<T>();
+        }
+
+
+        private void ExtractPosition()
+        {
+            foreach (var (property, attribute) in _columnAttributeMappings.OrderBy(c => c.attribute.Position))
+                _positions.Add((string.Join($"{_fileAttribute.Separator} ",
+                        _columnAttributeMappings.OrderBy(c => c.attribute.Position).Select(c => c.attribute.Name))
+                    .IndexOf(attribute.Name, StringComparison.Ordinal), property));
+        }
+
+        private void ExtractPositions(string line)
+        {
+            var header = line.Split(_fileAttribute.Separator).Select(Sanitize()).ToList();
+            foreach (var (property, attribute) in _columnAttributeMappings.OrderBy(c => c.attribute.Position))
+                _positions.Add((header.IndexOf(attribute.Name), property));
         }
 
         private static List<(PropertyInfo property, CsvColumnAttribute attribute)> GetColumnAttributeMappings()
@@ -45,36 +94,15 @@
             return columnAttribute;
         }
 
-        internal static Serializer<T> Create()
+        private Type GetCustomConverter(PropertyInfo propertyInfo)
         {
-            return new Serializer<T>();
+            return _columnAttributeMappings.FirstOrDefault(cam => cam.property == propertyInfo)
+                .attribute.ColumnConverter;
         }
 
-        public IEnumerable<T> Deserialize(string csv)
+        private static CsvFileAttribute GetFileAttribute()
         {
-            using (var stringReader = new StringReader(csv))
-            {
-                var line = stringReader.ReadLine();
-
-                if (_fileAttribute.HasHeaders) ExtractPositions(line);
-
-                while ((line = stringReader.ReadLine()) != null) yield return ParseData(line);
-            }
-        }
-
-        public IEnumerable<T> Deserialize(Stream csvStream)
-        {
-            using (var streamReader = new StreamReader(csvStream))
-            {
-                while (!streamReader.EndOfStream)
-                {
-                    var line = streamReader.ReadLine();
-                    
-                    if (_fileAttribute.HasHeaders) ExtractPositions(line);
-
-                    yield return ParseData(line);
-                }
-            }
+            return typeof(T).GetTypeInfo().GetCustomAttribute<CsvFileAttribute>();
         }
 
         private T ParseData(string line)
@@ -108,41 +136,9 @@
             return instance;
         }
 
-        private Type GetCustomConverter(PropertyInfo propertyInfo)
-        {
-            return _columnAttributeMappings.FirstOrDefault(cam => cam.property == propertyInfo)
-                .attribute.ColumnConverter;
-        }
-
-        private void ExtractPositions(string line)
-        {
-            var header = line.Split(_fileAttribute.Separator).Select(Sanitize()).ToList();
-            foreach (var (property, attribute) in _columnAttributeMappings.OrderBy(c => c.attribute.Position))
-                _positions.Add((header.IndexOf(attribute.Name), property));
-        }
-
         private Func<string, string> Sanitize()
         {
             return s => s.Trim().Trim(_fileAttribute.StringQuotes);
-        }
-
-        public string Serialize(IEnumerable<T> list)
-        {
-            if (!_fileAttribute.HasHeaders) return string.Empty;
-            ExtractPosition();
-            var header = string.Join($"{_fileAttribute.Separator} ",
-                _columnAttributeMappings.OrderBy(c => c.attribute.Position).Select(c => c.attribute.Name));
-            return
-                $"{header}{Environment.NewLine}{ToCsvString(list)}";
-        }
-
-
-        private void ExtractPosition()
-        {
-            foreach (var (property, attribute) in _columnAttributeMappings.OrderBy(c => c.attribute.Position))
-                _positions.Add((string.Join($"{_fileAttribute.Separator} ",
-                        _columnAttributeMappings.OrderBy(c => c.attribute.Position).Select(c => c.attribute.Name))
-                    .IndexOf(attribute.Name, StringComparison.Ordinal), property));
         }
 
         private string ToCsvString(IEnumerable<T> list)
@@ -157,10 +153,7 @@
                     .OrderBy(j => j.Position).Select(p =>
                     {
                         var customConverter = GetCustomConverter(p.p);
-                        if (customConverter is null)
-                        {
-                            return p.p.GetValue(item).ToString();
-                        }
+                        if (customConverter is null) return p.p.GetValue(item).ToString();
 
                         var converter = (ICustomConversion) Activator.CreateInstance(customConverter);
                         return converter.Compose(p.p.GetValue(item));
