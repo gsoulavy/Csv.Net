@@ -36,10 +36,15 @@ namespace GSoulavy.Csv.Tests.CsvConvertTests
         }
 
         [Fact]
-        public void FileWithHeaderDateAndSemi()
+        public void FileWithHeaderAndDateAsStream()
         {
-            var text = File.ReadAllText(@".\Files\FileWithHeaderDateAndSemi.csv");
-            var result = CsvConvert.Deserialize<FileWithHeaderDateAndSemi>(text).ToList();
+            var text = File.ReadAllText(@".\Files\FileWithHeaderAndDate.csv");
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(text);
+            writer.Flush();
+            stream.Position = 0;
+            var result = CsvConvert.Deserialize<FileWithHeaderAndDate>(stream).ToList();
             result.First().Name.Should().Be("Gabs");
             result.First().DateOfBirth.Should().Be(new DateTime(1980, 10, 11));
         }
@@ -54,6 +59,15 @@ namespace GSoulavy.Csv.Tests.CsvConvertTests
             result.First().Age.Should().Be(35);
             result.Last().Name.Should().Be("Anna");
             result.Last().Age.Should().Be(23);
+        }
+
+        [Fact]
+        public void FileWithHeaderDateAndSemi()
+        {
+            var text = File.ReadAllText(@".\Files\FileWithHeaderDateAndSemi.csv");
+            var result = CsvConvert.Deserialize<FileWithHeaderDateAndSemi>(text).ToList();
+            result.First().Name.Should().Be("Gabs");
+            result.First().DateOfBirth.Should().Be(new DateTime(1980, 10, 11));
         }
     }
 }

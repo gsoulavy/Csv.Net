@@ -38,11 +38,9 @@
         {
             using (var streamReader = new StreamReader(csvStream))
             {
-                var line = streamReader.ReadLine();
+                if (_fileAttribute.HasHeaders) ExtractPositions(streamReader.ReadLine());
 
-                if (_fileAttribute.HasHeaders) ExtractPositions(line);
-
-                while (!streamReader.EndOfStream) yield return ParseData(line);
+                while (!streamReader.EndOfStream) yield return ParseData(streamReader.ReadLine());
             }
         }
 
