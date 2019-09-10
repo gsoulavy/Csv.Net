@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.IO;
+    using System.Text;
 
     public static class CsvConvert
     {
@@ -11,10 +12,10 @@
                 .Create().Deserialize(csv);
         }
 
-        public static IEnumerable<T> Deserialize<T>(Stream csvStream) where T : class
+        public static IEnumerable<T> Deserialize<T>(Stream csvStream, Encoding encoding = null) where T : class
         {
             return Serializer<T>
-                .Create().Deserialize(csvStream);
+                .Create().Deserialize(csvStream, encoding);
         }
 
         public static string Serialize<T>(IEnumerable<T> list) where T : class
