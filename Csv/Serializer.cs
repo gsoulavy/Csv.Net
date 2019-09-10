@@ -34,9 +34,9 @@
             }
         }
 
-        public IEnumerable<T> Deserialize(Stream csvStream)
+        public IEnumerable<T> Deserialize(Stream csvStream, Encoding encoding = null)
         {
-            using (var streamReader = new StreamReader(csvStream))
+            using (var streamReader = new StreamReader(csvStream, encoding ?? Encoding.UTF8))
             {
                 if (_fileAttribute.HasHeaders) ExtractPositions(streamReader.ReadLine());
 
