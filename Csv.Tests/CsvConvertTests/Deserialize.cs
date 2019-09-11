@@ -24,6 +24,7 @@ namespace GSoulavy.Csv.Tests.CsvConvertTests
             var text = File.ReadAllText(@".\Files\FileWithQuotes.csv");
             var result = CsvConvert.Deserialize<FileWithQuotes>(text).ToList();
             result.First().Title.Should().Be("Greetings");
+            result.First(r => r.Title.Contains("New York")).Title.Should().Be("New York, New York");
         }
 
         [Fact]
