@@ -7,12 +7,14 @@
     using System.Linq;
     using System.Reflection;
     using System.Text;
+    using System.Text.RegularExpressions;
 
     internal class Serializer<T> where T : class
     {
         private readonly List<(PropertyInfo property, CsvColumnAttribute attribute)> _columnAttributeMappings;
         private readonly CsvFileAttribute _fileAttribute;
         private readonly List<(int index, PropertyInfo propertyInfo)> _positions;
+        private readonly Regex _regex;
 
         public Serializer()
         {
@@ -20,6 +22,16 @@
                              new CsvFileAttribute {HasHeaders = true, Separator = ','};
             _columnAttributeMappings = GetColumnAttributeMappings();
             _positions = new List<(int index, PropertyInfo propertyName)>();
+            _regex = GetRegex(_fileAttribute.Separator);
+        }
+
+        private Regex GetRegex(char separator)
+        {
+	        return new Regex($"((?<=\")[^\"]*(?=\"({separator}|$)+)|(?<={separator}|^)[^{separator}\"]*(?={separator}|$))", RegexOptions.Compiled);
+        }
+        
+        private string[] Split(string input) {
+            return _regex.Matches(input).Cast<Match>().Select(c => c.Value).ToArray();
         }
 
         public IEnumerable<T> Deserialize(string csv)
@@ -70,7 +82,7 @@
 
         private void ExtractPositions(string line)
         {
-            var header = line.Split(_fileAttribute.Separator).Select(Sanitize()).ToList();
+            var header = Split(line).Select(Sanitize()).ToList();
             foreach (var (property, attribute) in _columnAttributeMappings.OrderBy(c => c.attribute.Position))
                 _positions.Add((header.IndexOf(attribute.Name), property));
         }
@@ -105,7 +117,7 @@
 
         private T ParseData(string line)
         {
-            var dataLine = line?.Split(_fileAttribute.Separator).Select(Sanitize()).ToList() ??
+            var dataLine = Split(line).Select(Sanitize()).ToList() ??
                            throw new ArgumentException("The Csv file does not contain data");
             var type = typeof(T);
             var instance = (T) Activator.CreateInstance(type);
