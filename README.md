@@ -1,5 +1,6 @@
 # GSoulavy.Csv.Net
-
+[![.NET](https://github.com/gsoulavy/Csv.Net/actions/workflows/ci.yml/badge.svg)](https://github.com/gsoulavy/Csv.Net/actions/workflows/ci.yml)
+[![Release to Nuget](https://github.com/gsoulavy/Csv.Net/actions/workflows/release.yml/badge.svg)](https://github.com/gsoulavy/Csv.Net/actions/workflows/release.yml)
 [![NuGet version (GSoulavy.Csv.Net)](https://img.shields.io/nuget/v/GSoulavy.Csv.Net.svg?style=flat-square)](https://www.nuget.org/packages/GSoulavy.Csv.Net/) 
 
 Simple csv .Net Standard 2.0 parser library
