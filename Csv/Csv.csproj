@@ -12,6 +12,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>csv dotnet standard parser</PackageTags>
     <PackageId>GSoulavy.Csv.Net</PackageId>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Version>2.3.3</Version>
   </PropertyGroup>
   <PropertyGroup>
@@ -19,4 +20,8 @@
     <AssemblyVersion>2.3.3.0</AssemblyVersion>
     <FileVersion>2.3.3.0</FileVersion>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>
